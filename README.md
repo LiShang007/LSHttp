@@ -237,6 +237,6 @@
                         }).execute(UploadFragment.this);
 
 
-上传下载需要读写权限，推荐[LSPermissions]("https://github.com/LiShang007/LSPermissons" "LSPermissions")
+上传下载需要读写权限，推荐 [LSPermissions](https://github.com/LiShang007/LSPermissons "LSPermissions")
 
 
