@@ -23,6 +23,11 @@
                 .build();
 
     LSHttp.getInstance().setClient(mClient);
+#### 配置全局请求header
+      //配置全局请求header
+        LSHttp.getInstance()
+                .addHeader("key","value")
+                .addHeaders(map);
 
 #### Activity、Fragment消耗自动取消请求
 
