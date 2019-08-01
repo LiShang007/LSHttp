@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 28
@@ -34,4 +35,19 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
 
 
+}
+
+
+publish {
+    userOrg = 'lishang007'
+    groupId = 'com.lishang'
+    repoName = "maven"
+    artifactId = 'LSHttps'
+    publishVersion = '1.0.0'
+    desc = 'http request lib'
+    website = 'https://github.com/LiShang007/LSHttp'
+}
+
+task javadoc(type: Javadoc) {
+    options.encoding = "utf-8"
 }

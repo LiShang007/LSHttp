@@ -1,4 +1,9 @@
 #### 网络请求框架 
+
+#### 使用
+    compile 'com.lishang:LSHttps:1.0.0'
+
+
 #### 目前对以下请求进行了封装
 - get请求
 - post表单、json
