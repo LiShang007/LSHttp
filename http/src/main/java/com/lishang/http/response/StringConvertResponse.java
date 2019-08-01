@@ -1,5 +1,6 @@
 package com.lishang.http.response;
 
+import com.lishang.http.LSHttp;
 import com.lishang.http.callback.ResponseCallBack;
 import com.lishang.http.callback.StringCallBack;
 import com.lishang.http.exception.LSHttpException;
@@ -13,17 +14,27 @@ public class StringConvertResponse implements IConvertResponse {
 
     @Override
     public void convert(Response response) {
-        String string = null;
         try {
-            string = response.body().string();
-            if (callBack != null) {
-                callBack.onSuccess(string);
-            }
-        } catch (IOException e) {
+            final String string = response.body().string();
+            LSHttp.getInstance().runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (callBack != null) {
+                        callBack.onSuccess(string);
+                    }
+                }
+            });
+
+        } catch (final IOException e) {
             e.printStackTrace();
-            if (callBack != null) {
-                callBack.onFail(LSHttpException.handleException(e));
-            }
+            LSHttp.getInstance().runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (callBack != null) {
+                        callBack.onFail(LSHttpException.handleException(e));
+                    }
+                }
+            });
         }
 
     }

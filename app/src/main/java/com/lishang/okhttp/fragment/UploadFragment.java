@@ -17,7 +17,6 @@ import com.lishang.http.LSHttp;
 import com.lishang.http.callback.StringCallBack;
 import com.lishang.http.callback.UploadCallBack;
 import com.lishang.http.exception.LSHttpException;
-import com.lishang.okhttp.MD5;
 import com.lishang.okhttp.R;
 import com.lishang.permissions.LSPermissions;
 import com.lishang.permissions.listener.OnPermissionListener;
@@ -42,6 +41,10 @@ public class UploadFragment extends Fragment implements View.OnClickListener {
      * 上传
      */
     private Button mBtnUpload;
+    /**
+     * 上传多图
+     */
+    private Button mBtnUpload1;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,6 +66,8 @@ public class UploadFragment extends Fragment implements View.OnClickListener {
         mTxtResult = (TextView) view.findViewById(R.id.txt_result);
         mBtnUpload = (Button) view.findViewById(R.id.btn_upload);
         mBtnUpload.setOnClickListener(this);
+        mBtnUpload1 = (Button) view.findViewById(R.id.btn_upload_1);
+        mBtnUpload1.setOnClickListener(this);
     }
 
     @Override
@@ -78,9 +83,8 @@ public class UploadFragment extends Fragment implements View.OnClickListener {
                     public void onResult(PermissionResult result) {
 
                         if (result.granted) {
-                            String url = "https://fix-apiweb.anchumall.cn/image/upload" + "?appversion="
-                                    + "3.3.0"
-                                    + "&os=android&sign=" + MD5.encoderByUrl("/image/upload");
+                            //替换成自己的
+                            String url = "https://www.wanandroid.com/image/upload";
 
                             String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/123.jpg";
                             Log.e("path", "path:" + path);
@@ -115,6 +119,58 @@ public class UploadFragment extends Fragment implements View.OnClickListener {
                 }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
 
                 break;
+            case R.id.btn_upload_1:
+                uploadMore(v);
+                break;
         }
     }
+
+
+    public void uploadMore(View view) {
+
+
+        LSPermissions.request(this, new OnPermissionListener() {
+            @Override
+            public void onResult(PermissionResult result) {
+
+                if (result.granted) {
+                    //替换成自己的
+                    String url = "https://www.wanandroid.com/image/upload";
+
+
+                    String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+                    Log.e("path", "path:" + path);
+
+                    LSHttp.multipart(url).addFile("image_1", new File(path + "/123.jpg"))
+                            .addFile("image_2", new File(path + "/456.jpg"))
+                            .addHeader("Authorization", "3c4dfe6f7a7caaa7ccca39ec157554f5")
+                            .progress(new UploadCallBack() {
+                                @Override
+                                public void onLoading(int progress) {
+                                    mProgressHorizontal.setProgress(progress);
+                                    mTxtProgress.setText("" + progress + "%");
+                                }
+                            })
+                            .callback(new StringCallBack() {
+                                @Override
+                                public void onSuccess(String string) {
+                                    Log.e("onSuccess", string);
+                                    mTxtResult.setText("请求成功:\n" + string);
+
+                                }
+
+                                @Override
+                                public void onFail(LSHttpException e) {
+                                    mTxtResult.setText("请求失败:\n" + e.message);
+
+                                }
+                            }).execute(UploadFragment.this);
+
+                }
+
+            }
+        }, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
+
+    }
+
 }

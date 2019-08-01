@@ -8,6 +8,7 @@ import com.lishang.http.callback.JsonCallBack;
 import com.lishang.http.lifecycle.LSHttpActivityLifecycleCallBacks;
 import com.lishang.http.callback.ResponseCallBack;
 import com.lishang.http.exception.LSHttpException;
+import com.lishang.http.response.IConvertResponse;
 import com.lishang.http.response.JsonConvertResponse;
 import com.lishang.http.response.StringConvertResponse;
 
@@ -29,6 +30,7 @@ public class BaseRequest<T extends BaseRequest> {
     protected Map<String, String> headers = new HashMap<>(); //请求头参数
     protected String tag;//请求tag
     protected ResponseCallBack callBack;//请求回调
+    protected IConvertResponse convertResponse; //用于自定义转换器
 
     public BaseRequest() {
         mClient = LSHttp.getInstance().getClient();
@@ -65,6 +67,11 @@ public class BaseRequest<T extends BaseRequest> {
 
     public T callback(ResponseCallBack callBack) {
         this.callBack = callBack;
+        return (T) this;
+    }
+
+    public T convert(IConvertResponse convertResponse) {
+        this.convertResponse = convertResponse;
         return (T) this;
     }
 
@@ -130,32 +137,37 @@ public class BaseRequest<T extends BaseRequest> {
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
 
-                runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
+                if (response.code() == 200) {
+                    //请求成功
+                    if (convertResponse != null) {
+                        convertResponse.setCallBack(callBack);
+                        convertResponse.convert(response);
+                    } else if (callBack != null) {
 
-                        if (response.code() == 200) {
-                            //请求成功
-                            if (callBack != null) {
-
-                                if (callBack instanceof JsonCallBack) {
-                                    JsonConvertResponse convertResponse = new JsonConvertResponse();
-                                    convertResponse.setCallBack(callBack);
-                                    convertResponse.convert(response);
-                                } else {
-                                    StringConvertResponse convertResponse = new StringConvertResponse();
-                                    convertResponse.setCallBack(callBack);
-                                    convertResponse.convert(response);
-                                }
-                            }
+                        if (callBack instanceof JsonCallBack) {
+                            JsonConvertResponse convertResponse = new JsonConvertResponse();
+                            convertResponse.setCallBack(callBack);
+                            convertResponse.convert(response);
                         } else {
+                            StringConvertResponse convertResponse = new StringConvertResponse();
+                            convertResponse.setCallBack(callBack);
+                            convertResponse.convert(response);
+                        }
+                    }
+                } else {
+
+                    runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
                             if (callBack != null) {
                                 callBack.onFail(new LSHttpException(LSHttpException.ERROR.HTTP_ERROR, "请求失败，服务器开小差..." + response.code()));
                             }
                         }
+                    });
 
-                    }
-                });
+
+                }
+
                 removeLifecycle(obj, call);
             }
         });

@@ -34,15 +34,22 @@
         android:onClick="upload"
         android:text="上传" />
 
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="uploadMore"
-        android:text="上传多图" />
+        android:onClick="convert"
+        android:text="自定义转换器" />
+
 
     <TextView
         android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:id="@+id/image"/>
 
 </LinearLayout>

@@ -1,6 +1,7 @@
 package com.lishang.http.response;
 
 import com.google.gson.Gson;
+import com.lishang.http.LSHttp;
 import com.lishang.http.callback.JsonCallBack;
 import com.lishang.http.callback.ResponseCallBack;
 import com.lishang.http.exception.LSHttpException;
@@ -23,15 +24,26 @@ public class JsonConvertResponse implements IConvertResponse {
         try {
 
             string = response.body().string();
-            Object data = new Gson().fromJson(string, type);
-            if (callBack != null) {
-                callBack.onSuccess(data);
-            }
-        } catch (IOException e) {
+            final Object data = new Gson().fromJson(string, type);
+            LSHttp.getInstance().runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (callBack != null) {
+                        callBack.onSuccess(data);
+                    }
+                }
+            });
+
+        } catch (final IOException e) {
             e.printStackTrace();
-            if (callBack != null) {
-                callBack.onFail(LSHttpException.handleException(e));
-            }
+            LSHttp.getInstance().runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (callBack != null) {
+                        callBack.onFail(LSHttpException.handleException(e));
+                    }
+                }
+            });
         }
 
     }

@@ -351,7 +351,6 @@ public class DownloadRequest extends BaseRequest<DownloadRequest> {
         RandomAccessFile randomAccessFile;
         File file;
         Call call;
-        long startSize;
 
         public DownloadFile(String path, String url) throws FileNotFoundException {
             file = new File(path);

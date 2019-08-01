@@ -135,21 +135,21 @@ public class LSHttp {
         return this;
     }
 
-    public LSHttp setApplication(Application application) {
-
-        if (lifecycleCallBacks == null) {
-            lifecycleCallBacks = new LSHttpActivityLifecycleCallBacks();
+    public static LSHttp init(Application application) {
+        LSHttp http = getInstance();
+        if (http.lifecycleCallBacks == null) {
+            http.lifecycleCallBacks = new LSHttpActivityLifecycleCallBacks();
         }
 
-        if (this.application != null) {
-            this.application.unregisterActivityLifecycleCallbacks(lifecycleCallBacks);
+        if (http.application != null) {
+            http.application.unregisterActivityLifecycleCallbacks(http.lifecycleCallBacks);
         }
 
-        this.application = application;
+        http.application = application;
 
-        this.application.registerActivityLifecycleCallbacks(lifecycleCallBacks);
+        http.application.registerActivityLifecycleCallbacks(http.lifecycleCallBacks);
 
-        return this;
+        return http;
     }
 
 

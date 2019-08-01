@@ -17,7 +17,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.internal.http.HttpHeaders;
-import okhttp3.logging.HttpLoggingInterceptor;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.GzipSource;
@@ -89,7 +88,7 @@ public class LSHttpLoggingInterceptor implements Interceptor {
         void log(String message);
 
         /**
-         * A {@link HttpLoggingInterceptor.Logger} defaults output appropriate for the current platform.
+         * A {@link LSHttpLoggingInterceptor.Logger} defaults output appropriate for the current platform.
          */
         LSHttpLoggingInterceptor.Logger DEFAULT = new LSHttpLoggingInterceptor.Logger() {
             @Override

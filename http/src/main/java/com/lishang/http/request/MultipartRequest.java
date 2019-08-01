@@ -4,6 +4,7 @@ import android.util.Log;
 
 
 import com.lishang.http.callback.UploadCallBack;
+import com.lishang.http.utils.LSLog;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,7 +87,7 @@ public class MultipartRequest extends BaseRequest<MultipartRequest> {
 
                                 @Override
                                 public void onProgress(long total, long current) {
-                                    Log.e("onProgress", "上传:" + current + " / " + total);
+                                    LSLog.i("onProgress upload:" + current + " / " + total);
                                     if (progressCallBack != null) {
                                         final int progress = (int) (100 * current / total);
                                         runOnMainThread(new Runnable() {
