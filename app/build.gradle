@@ -27,6 +27,7 @@ dependencies {
     implementation 'com.lishang:LSPermissions:1.0.0'
 
     implementation 'com.google.code.gson:gson:2.8.2'
-    implementation project(path: ':http')
+//    implementation project(path: ':http')
+    implementation 'com.lishang:LSHttps:1.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 }
