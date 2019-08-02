@@ -8,6 +8,7 @@ import com.lishang.http.utils.LSHttpLoggingInterceptor;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 public class App extends Application {
 
@@ -27,6 +28,8 @@ public class App extends Application {
                 .showLog(true)
                 .addHeader("key", "value")
                 .baseUrl("https://wanandroid.com/");
+
+
 
     }
 }
