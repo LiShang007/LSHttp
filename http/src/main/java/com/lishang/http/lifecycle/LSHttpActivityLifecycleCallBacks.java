@@ -7,6 +7,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
+/**
+ * request 绑定生命周期 Activity销毁时自动取消
+ */
 public class LSHttpActivityLifecycleCallBacks extends LSHttpLifecycleCallBacks implements Application.ActivityLifecycleCallbacks {
 
 

@@ -9,6 +9,9 @@ import java.util.concurrent.ConcurrentMap;
 
 import okhttp3.Call;
 
+/**
+ * 绑定生命周期基类、对外提供put remove
+ */
 public class LSHttpLifecycleCallBacks {
 
     private ConcurrentMap<String, SparseArray<Call>> map = new ConcurrentHashMap<>();

@@ -40,9 +40,9 @@ dependencies {
 
 publish {
     userOrg = 'lishang007'
-    groupId = 'com.lishang'
+    groupId = 'com.lishang.http'
     repoName = "maven"
-    artifactId = 'LSHttps'
+    artifactId = 'LSHttp'
     publishVersion = '1.0.0'
     desc = 'http request lib'
     website = 'https://github.com/LiShang007/LSHttp'

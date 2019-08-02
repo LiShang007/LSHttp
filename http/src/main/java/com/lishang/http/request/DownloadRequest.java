@@ -27,6 +27,9 @@ import okio.ForwardingSource;
 import okio.Okio;
 import okio.Source;
 
+/**
+ * 下载 （支持下载进度监听、边下边存）
+ */
 public class DownloadRequest extends BaseRequest<DownloadRequest> {
     private OkHttpClient mClient;
     private String downFilePath; //下载文件路径
@@ -102,11 +105,23 @@ public class DownloadRequest extends BaseRequest<DownloadRequest> {
                 .build();
     }
 
+    /**
+     * 文件下载保存路径
+     * @param path
+     * @return
+     */
     public DownloadRequest path(String path) {
         this.downFilePath = path;
         return this;
     }
 
+
+    @Override
+    public Request generateRequest(Request.Builder builder) {
+        startPos = downloadFile.size();
+        builder.addHeader("RANGE", "bytes=" + startPos + "-");
+        return builder.build();
+    }
 
     @Override
     public void execute(final Object obj) {
@@ -131,12 +146,8 @@ public class DownloadRequest extends BaseRequest<DownloadRequest> {
             return;
         }
 
-        startPos = downloadFile.size();
-        Request.Builder builder = request()
-                .addHeader("RANGE", "bytes=" + startPos + "-");
 
-
-        final Call call = mClient.newCall(builder.build());
+        final Call call = mClient.newCall(generateRequest(request()));
         downloadFile.setCall(call);
 
         bindLifecycle(obj, call);
@@ -283,7 +294,9 @@ public class DownloadRequest extends BaseRequest<DownloadRequest> {
         });
     }
 
-
+    /**
+     * 自定义 ResponseBody 用于获取下载进度、以及边下边存
+     */
     private static class ProgressResponseBody extends ResponseBody {
 
         private final ResponseBody responseBody;
@@ -331,7 +344,6 @@ public class DownloadRequest extends BaseRequest<DownloadRequest> {
                     totalBytesRead += bytesRead != -1 ? bytesRead : 0;
 
                     LSLog.i("read size:" + totalBytesRead);
-
 
                     progressListener.update(totalBytesRead, responseBody.contentLength(), done);
                     return bytesRead;

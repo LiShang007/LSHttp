@@ -14,8 +14,6 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        //初始化
-        LSHttp.init(this);
 
         //配置全局的OkHttp
         OkHttpClient mClient = new OkHttpClient.Builder()
@@ -24,8 +22,11 @@ public class App extends Application {
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .addInterceptor(new LSHttpLoggingInterceptor().setLevel(LSHttpLoggingInterceptor.Level.BODY))
                 .build();
-
-        LSHttp.getInstance().setClient(mClient);
+        //初始化
+        LSHttp.init(this, mClient)
+                .showLog(true)
+                .addHeader("key", "value")
+                .baseUrl("https://wanandroid.com/");
 
     }
 }

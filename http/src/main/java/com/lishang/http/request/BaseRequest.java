@@ -1,6 +1,9 @@
 package com.lishang.http.request;
 
 
+import android.app.Activity;
+import android.net.Uri;
+import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 
 import com.lishang.http.LSHttp;
@@ -23,7 +26,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class BaseRequest<T extends BaseRequest> {
+/**
+ * 基础Request
+ *
+ * @param <T>
+ */
+public abstract class BaseRequest<T extends BaseRequest> {
     protected OkHttpClient mClient;
     protected LSHttpActivityLifecycleCallBacks lifecycleCallBacks;
     protected String url; //请求url
@@ -41,12 +49,24 @@ public class BaseRequest<T extends BaseRequest> {
         return callBack;
     }
 
-
+    /**
+     * 添加请求header
+     *
+     * @param key
+     * @param value
+     * @return
+     */
     public T addHeader(String key, String value) {
         headers.put(key, value);
         return (T) this;
     }
 
+    /**
+     * 添加多个header
+     *
+     * @param map
+     * @return
+     */
     public T addHeaders(Map<String, String> map) {
         if (map != null) {
             headers.putAll(map);
@@ -54,27 +74,55 @@ public class BaseRequest<T extends BaseRequest> {
         return (T) this;
     }
 
+    /**
+     * url
+     *
+     * @param url
+     * @return
+     */
     public T url(String url) {
         this.url = url;
         return (T) this;
     }
 
+    /**
+     * tag
+     *
+     * @param tag
+     * @return
+     */
     public T tag(String tag) {
         this.tag = tag;
         return (T) this;
     }
 
-
+    /**
+     * 请求结果返回
+     *
+     * @param callBack
+     * @return
+     */
     public T callback(ResponseCallBack callBack) {
         this.callBack = callBack;
         return (T) this;
     }
 
+    /**
+     * 转换器
+     *
+     * @param convertResponse
+     * @return
+     */
     public T convert(IConvertResponse convertResponse) {
         this.convertResponse = convertResponse;
         return (T) this;
     }
 
+    /**
+     * 创建headers
+     *
+     * @return
+     */
     public Headers createHeaders() {
         Headers.Builder builder = new Headers.Builder();
         for (String key : headers.keySet()) {
@@ -83,6 +131,11 @@ public class BaseRequest<T extends BaseRequest> {
         return builder.build();
     }
 
+    /**
+     * 构建基础request.builder
+     *
+     * @return
+     */
     public Request.Builder request() {
         Request.Builder builder = new Request.Builder()
                 .url(url)
@@ -91,25 +144,33 @@ public class BaseRequest<T extends BaseRequest> {
         return builder;
     }
 
+    /**
+     * 用于定制request 差异
+     *
+     * @param builder
+     * @return
+     */
+    public abstract Request generateRequest(Request.Builder builder);
+
+    /**
+     * 异步执行网络请求
+     */
     public void execute() {
         execute(null);
     }
 
+    /**
+     * 异步执行网络请求
+     *
+     * @param obj 支持Activity、Fragment
+     */
     public void execute(final Object obj) {
         checkUrl();
-        Request.Builder builder = request();
 
         OkHttpClient client = mClient;
-        if (this instanceof PostRequest) {
-            builder.post(((PostRequest) this).createFormBody());
-        } else if (this instanceof JsonRequest) {
-            builder.post(((JsonRequest) this).createJsonBody());
-        } else if (this instanceof MultipartRequest) {
-            builder.post(((MultipartRequest) this).createMultipartBody());
-        }
 
 
-        Call call = client.newCall(builder.build());
+        Call call = client.newCall(generateRequest(request()));
 
         bindLifecycle(obj, call);
 
@@ -164,36 +225,85 @@ public class BaseRequest<T extends BaseRequest> {
                             }
                         }
                     });
-
-
                 }
-
                 removeLifecycle(obj, call);
             }
         });
     }
 
+    /**
+     * 检查url是否合法
+     */
     public void checkUrl() {
         if (TextUtils.isEmpty(this.url)) {
             throw new NullPointerException("url is null");
         }
+        String baseUrl = LSHttp.getInstance().getBaseUrl();
+        if (!TextUtils.isEmpty(baseUrl)) {
+            Uri uri = Uri.parse(url);
+            if ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())) {
+
+            } else {
+                url = baseUrl + url;
+            }
+        }
     }
 
+    /**
+     * 运行到主线程
+     *
+     * @param runnable
+     */
     public void runOnMainThread(Runnable runnable) {
         LSHttp.getInstance().runOnMainThread(runnable);
     }
 
-
-    protected void bindLifecycle(Object obj, Call call) {
+    /**
+     * 绑定Activity、Fragment
+     *
+     * @param obj
+     * @param call
+     */
+    public void bindLifecycle(Object obj, Call call) {
         if (lifecycleCallBacks != null && obj != null) {
-            lifecycleCallBacks.put(obj.getClass().getName(), call);
+            if (obj instanceof Activity || obj instanceof Fragment)
+                lifecycleCallBacks.put(obj.getClass().getName(), call);
         }
     }
 
-    protected void removeLifecycle(Object obj, Call call) {
+    /**
+     * 移除绑定
+     *
+     * @param obj
+     * @param call
+     */
+    public void removeLifecycle(Object obj, Call call) {
         if (lifecycleCallBacks != null && obj != null) {
             lifecycleCallBacks.remove(obj.getClass().getName(), call);
         }
     }
 
+    public OkHttpClient getClient() {
+        return mClient;
+    }
+
+    public LSHttpActivityLifecycleCallBacks getLifecycleCallBacks() {
+        return lifecycleCallBacks;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public IConvertResponse getConvertResponse() {
+        return convertResponse;
+    }
 }

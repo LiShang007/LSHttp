@@ -3,7 +3,9 @@ package com.lishang.http.lifecycle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
-
+/**
+ * request 绑定Fragment 生命周期
+ */
 public class LSHttpFragmentLifecycleCallBacks extends FragmentManager.FragmentLifecycleCallbacks {
 
     private LSHttpLifecycleCallBacks callBacks;

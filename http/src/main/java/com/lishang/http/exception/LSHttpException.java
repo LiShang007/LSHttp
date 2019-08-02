@@ -13,6 +13,9 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 
+/**
+ * 预定的一些异常
+ */
 public class LSHttpException extends Exception {
 
     /**

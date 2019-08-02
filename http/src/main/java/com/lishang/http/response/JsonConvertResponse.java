@@ -12,6 +12,9 @@ import java.lang.reflect.Type;
 
 import okhttp3.Response;
 
+/**
+ * json 转换
+ */
 public class JsonConvertResponse implements IConvertResponse {
     JsonCallBack callBack;
 

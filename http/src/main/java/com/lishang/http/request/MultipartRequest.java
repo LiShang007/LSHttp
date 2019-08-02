@@ -28,7 +28,7 @@ import okio.ForwardingSink;
 import okio.Okio;
 
 /**
- * 文件上传
+ * 文件上传 （支持多文件 进度监听 ）
  */
 public class MultipartRequest extends BaseRequest<MultipartRequest> {
 
@@ -51,7 +51,7 @@ public class MultipartRequest extends BaseRequest<MultipartRequest> {
         return this;
     }
 
-    public RequestBody createMultipartBody() {
+    private RequestBody createMultipartBody() {
 
 
         MultipartBody.Builder builder = new MultipartBody.Builder()
@@ -72,6 +72,11 @@ public class MultipartRequest extends BaseRequest<MultipartRequest> {
 
 
         return builder.build();
+    }
+
+    @Override
+    public Request generateRequest(Request.Builder builder) {
+        return builder.post(createMultipartBody()).build();
     }
 
     @Override

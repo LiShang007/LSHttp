@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void get(View view) {
 
-        LSHttp.get("https://wanandroid.com/wxarticle/chapters/json")
+        LSHttp.get("wxarticle/chapters/json")
                 .callback(new JsonCallBack<JsonData>() {
                     @Override
                     public void onFail(LSHttpException e) {
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void post(View view) {
-        LSHttp.post("https://www.wanandroid.com/user/login")
+        LSHttp.post("user/login")
                 .addParams("username", "xxxx")
                 .addParams("password", "xxxxx")
                 .callback(new StringCallBack() {

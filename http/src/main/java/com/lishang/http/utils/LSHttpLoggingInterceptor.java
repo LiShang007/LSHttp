@@ -21,7 +21,9 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.GzipSource;
 
-
+/**
+ * 日志打印
+ */
 public class LSHttpLoggingInterceptor implements Interceptor {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");

@@ -9,6 +9,9 @@ import java.io.IOException;
 
 import okhttp3.Response;
 
+/**
+ * String 转换
+ */
 public class StringConvertResponse implements IConvertResponse {
     StringCallBack callBack;
 

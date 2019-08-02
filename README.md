@@ -1,8 +1,15 @@
 #### 网络请求框架 
 
 #### 使用
-    compile 'com.lishang:LSHttps:1.0.0'
+    compile 'com.lishang.http:LSHttp:1.0.0'
 
+#### 使用到的库
+[com.squareup.okhttp3:okhttp:3.12.3](https://square.github.io/okhttp/)
+
+[com.google.code.gson:gson:2.8.2](https://github.com/google/gson)
+
+#### https内容借鉴
+[OKGO](https://github.com/jeasonlzy/okhttp-OkGo)
 
 #### 目前对以下请求进行了封装
 - get请求
@@ -13,12 +20,10 @@
 - 自定义转换器，默认提供了StringCallBack,JsonCallBack
 
 #### 初始化 在Application
+    
+    LSHttp.init(this); //初始化,使用默认配置
 
-    LSHttp.init(this); //初始化
-
-#### 配置自己的OkHttpClient，不配置的话一切使用默认的配置
-
-    //配置全局的OkHttp
+    //配置自己的OkHttpClient
     OkHttpClient mClient = new OkHttpClient.Builder()
                 .writeTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
@@ -27,12 +32,13 @@
                 //其它配置
                 .build();
 
-    LSHttp.getInstance().setClient(mClient);
-#### 配置全局请求header
-      //配置全局请求header
-        LSHttp.getInstance()
-                .addHeader("key","value")
-                .addHeaders(map);
+    LSHttp.init(this, mClient)
+                .showLog(true) //是否显示日志
+                .addHeader("key", "value") //全局添加header
+                .addHeaders(map) //添加多个headers
+                .baseUrl("https://wanandroid.com/"); //baseurl
+
+#### baseUrl说明:如果配置了baseUrl,在request时可以直接传入路径，例如:user/login,如果某次请求的baseUrl不是当前配置的，直接传入完整的url就可以了,例如:https://www.33lc.com/article/UploadPic/2012-7/201272510182494484.jpg
 
 #### Activity、Fragment消耗自动取消请求
 
@@ -128,7 +134,7 @@
 
 
 #### Get请求
-        LSHttp.get("https://wanandroid.com/wxarticle/chapters/json")
+        LSHttp.get("wxarticle/chapters/json")
                 .callback(new JsonCallBack<JsonData>() {
                     @Override
                     public void onFail(LSHttpException e) {
@@ -145,7 +151,7 @@
 
 #### Post请求
     //表单请求  application/x-www-form-urlencoded
-    LSHttp.post("https://www.wanandroid.com/user/login")
+    LSHttp.post("user/login")
                 .addParams("username", "xxxx")
                 .addParams("password", "xxxxx")
                 .callback(new StringCallBack() {
@@ -249,6 +255,5 @@
 
 上传下载需要读写权限，推荐 [LSPermissions](https://github.com/LiShang007/LSPermissons "LSPermissions")
 
-### 更新日志
-- ### 2019.08.01 第一次上传
+
 

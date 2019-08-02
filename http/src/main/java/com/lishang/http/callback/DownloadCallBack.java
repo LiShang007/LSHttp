@@ -1,6 +1,8 @@
 package com.lishang.http.callback;
 
-
+/**
+ * 下载回调
+ */
 public interface DownloadCallBack extends ResponseCallBack {
     //开始下载
     void onStart();
