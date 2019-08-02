@@ -302,133 +302,133 @@
             return (T) this;
         }
 
-    //添加多个header
-    public T addHeaders(Map<String, String> map) {
-        if (map != null) {
-            headers.putAll(map);
-        }
-        return (T) this;
-    }
-
-    //url
-    public T url(String url) {
-        this.url = url;
-        return (T) this;
-    }
-
-    //tag
-    public T tag(String tag) {
-        this.tag = tag;
-        return (T) this;
-    }
-
-    //请求结果返回
-    public T callback(ResponseCallBack callBack) {
-        this.callBack = callBack;
-        return (T) this;
-    }
-
-    //转换器
-    public T convert(IConvertResponse convertResponse) {
-        this.convertResponse = convertResponse;
-        return (T) this;
-    }
-
-    //创建headers
-    public Headers createHeaders() {
-        Headers.Builder builder = new Headers.Builder();
-        for (String key : headers.keySet()) {
-            builder.add(key, headers.get(key));
-        }
-        return builder.build();
-    }
-
-    //构建基础request.builder
-    public Request.Builder request() {
-        Request.Builder builder = new Request.Builder()
-                .url(url)
-                .tag(tag)
-                .headers(createHeaders());
-        return builder;
-    }
-
-    //用于定制request 差异
-    public abstract Request generateRequest(Request.Builder builder);
-
-    //异步执行网络请求
-    public void execute() {
-        execute(null);
-    }
-
- 
-    //异步执行网络请求 obj 支持Activity、Fragment
-    public void execute(final Object obj) {
-        checkUrl();
-
-        OkHttpClient client = mClient;
-
-
-        Call call = client.newCall(generateRequest(request()));
-        //与当前Acitivy、Fragment绑定关系
-        bindLifecycle(obj, call);
-
-
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, final IOException e) {
-                e.printStackTrace();
-                if (call.isCanceled()) {
-                    System.out.println("call is canceled");
-                    return;
-                }
-                runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (callBack != null) {
-                            callBack.onFail(LSHttpException.handleException(e));
-                        }
-                    }
-                });
-                //请求结束，移除绑定关系
-                removeLifecycle(obj, call);
-
+        //添加多个header
+        public T addHeaders(Map<String, String> map) {
+            if (map != null) {
+                headers.putAll(map);
             }
+            return (T) this;
+        }
 
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
+        //url
+        public T url(String url) {
+            this.url = url;
+            return (T) this;
+        }
 
-                if (response.code() == 200) {
-                    //请求成功
-                    if (convertResponse != null) {
-                        convertResponse.setCallBack(callBack);
-                        convertResponse.convert(response);
-                    } else if (callBack != null) {
+        //tag
+        public T tag(String tag) {
+            this.tag = tag;
+            return (T) this;
+        }
 
-                        if (callBack instanceof JsonCallBack) {
-                            JsonConvertResponse convertResponse = new JsonConvertResponse();
-                            convertResponse.setCallBack(callBack);
-                            convertResponse.convert(response);
-                        } else {
-                            StringConvertResponse convertResponse = new StringConvertResponse();
-                            convertResponse.setCallBack(callBack);
-                            convertResponse.convert(response);
-                        }
+        //请求结果返回
+        public T callback(ResponseCallBack callBack) {
+            this.callBack = callBack;
+            return (T) this;
+        }
+
+        //转换器
+        public T convert(IConvertResponse convertResponse) {
+            this.convertResponse = convertResponse;
+            return (T) this;
+        }
+
+        //创建headers
+        public Headers createHeaders() {
+            Headers.Builder builder = new Headers.Builder();
+            for (String key : headers.keySet()) {
+                builder.add(key, headers.get(key));
+            }
+            return builder.build();
+        }
+
+        //构建基础request.builder
+        public Request.Builder request() {
+            Request.Builder builder = new Request.Builder()
+                    .url(url)
+                    .tag(tag)
+                    .headers(createHeaders());
+            return builder;
+        }
+
+        //用于定制request 差异
+        public abstract Request generateRequest(Request.Builder builder);
+
+        //异步执行网络请求
+        public void execute() {
+            execute(null);
+        }
+
+    
+        //异步执行网络请求 obj 支持Activity、Fragment
+        public void execute(final Object obj) {
+            checkUrl();
+
+            OkHttpClient client = mClient;
+
+
+            Call call = client.newCall(generateRequest(request()));
+            //与当前Acitivy、Fragment绑定关系
+            bindLifecycle(obj, call);
+
+
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, final IOException e) {
+                    e.printStackTrace();
+                    if (call.isCanceled()) {
+                        System.out.println("call is canceled");
+                        return;
                     }
-                } else {
-
                     runOnMainThread(new Runnable() {
                         @Override
                         public void run() {
                             if (callBack != null) {
-                                callBack.onFail(new LSHttpException(LSHttpException.ERROR.HTTP_ERROR, "请求失败，服务器开小差..." + response.code()));
+                                callBack.onFail(LSHttpException.handleException(e));
                             }
                         }
                     });
+                    //请求结束，移除绑定关系
+                    removeLifecycle(obj, call);
+
                 }
-                //请求结束，移除绑定关系
-                removeLifecycle(obj, call);
-            }
-            });
+
+                @Override
+                public void onResponse(Call call, final Response response) throws IOException {
+
+                    if (response.code() == 200) {
+                        //请求成功
+                        if (convertResponse != null) {
+                            convertResponse.setCallBack(callBack);
+                            convertResponse.convert(response);
+                        } else if (callBack != null) {
+
+                            if (callBack instanceof JsonCallBack) {
+                                JsonConvertResponse convertResponse = new JsonConvertResponse();
+                                convertResponse.setCallBack(callBack);
+                                convertResponse.convert(response);
+                            } else {
+                                StringConvertResponse convertResponse = new StringConvertResponse();
+                                convertResponse.setCallBack(callBack);
+                                convertResponse.convert(response);
+                            }
+                        }
+                    } else {
+
+                        runOnMainThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (callBack != null) {
+                                    callBack.onFail(new LSHttpException(LSHttpException.ERROR.HTTP_ERROR, "请求失败，服务器开小差..." + response.code()));
+                                }
+                            }
+                        });
+                    }
+                    //请求结束，移除绑定关系
+                    removeLifecycle(obj, call);
+                }
+                });
         }
 
         //检查url是否合法
