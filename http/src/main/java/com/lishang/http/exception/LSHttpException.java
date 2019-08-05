@@ -56,7 +56,7 @@ public class LSHttpException extends Exception {
         public static final int ILLEGAL_STATE_ERROR = 1006;
 
         /**
-         * 服务端异常 http code ！= 200
+         * 服务端异常 http code >= 200 && <300
          */
         public static final int HTTP_ERROR = 1007;
 
@@ -64,18 +64,29 @@ public class LSHttpException extends Exception {
     }
 
 
-    public final int code;
-    public String message;
+    public final int code; //错误Code
+    public String message; //描述
+    public int status; //当code == 1007 时 http status;
 
     public LSHttpException(Throwable throwable, int code) {
+        this(throwable, code, -1);
+    }
+
+    public LSHttpException(Throwable throwable, int code, int status) {
         super(throwable);
         this.code = code;
         this.message = throwable.getMessage();
+        this.status = status;
     }
 
     public LSHttpException(int code, String message) {
+        this(code, message, -1);
+    }
+
+    public LSHttpException(int code, String message, int status) {
         this.code = code;
         this.message = message;
+        this.status = status;
     }
 
 

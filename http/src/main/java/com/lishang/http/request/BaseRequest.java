@@ -198,30 +198,16 @@ public abstract class BaseRequest<T extends BaseRequest> {
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
 
-                if (response.code() == 200) {
+                if (response.isSuccessful()) {
                     //请求成功
-                    if (convertResponse != null) {
-                        convertResponse.setCallBack(callBack);
-                        convertResponse.convert(response);
-                    } else if (callBack != null) {
-
-                        if (callBack instanceof JsonCallBack) {
-                            JsonConvertResponse convertResponse = new JsonConvertResponse();
-                            convertResponse.setCallBack(callBack);
-                            convertResponse.convert(response);
-                        } else {
-                            StringConvertResponse convertResponse = new StringConvertResponse();
-                            convertResponse.setCallBack(callBack);
-                            convertResponse.convert(response);
-                        }
-                    }
+                    onConvertCallBack(response);
                 } else {
 
                     runOnMainThread(new Runnable() {
                         @Override
                         public void run() {
                             if (callBack != null) {
-                                callBack.onFail(new LSHttpException(LSHttpException.ERROR.HTTP_ERROR, "请求失败，服务器开小差..." + response.code()));
+                                callBack.onFail(new LSHttpException(LSHttpException.ERROR.HTTP_ERROR, "请求失败，服务器开小差...", response.code()));
                             }
                         }
                     });
@@ -229,6 +215,29 @@ public abstract class BaseRequest<T extends BaseRequest> {
                 removeLifecycle(obj, call);
             }
         });
+    }
+
+    /**
+     * 请求成功，
+     *
+     * @param response
+     */
+    public void onConvertCallBack(final Response response) {
+        if (convertResponse != null) {
+            convertResponse.setCallBack(callBack);
+            convertResponse.convert(response);
+        } else if (callBack != null) {
+
+            if (callBack instanceof JsonCallBack) {
+                JsonConvertResponse convertResponse = new JsonConvertResponse();
+                convertResponse.setCallBack(callBack);
+                convertResponse.convert(response);
+            } else {
+                StringConvertResponse convertResponse = new StringConvertResponse();
+                convertResponse.setCallBack(callBack);
+                convertResponse.convert(response);
+            }
+        }
     }
 
     /**

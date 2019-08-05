@@ -5,7 +5,7 @@
 [LSHttp](https://github.com/LiShang007/LSHttp)库，就仅仅是对OkHttp进行了一些封装，采用链式调用的方法，一行代码实现网络请求,支持绑定当前Activity、Fragment,在销毁时自动取消请求，让开发者使用起来更方便。
 
 ## 使用
-    compile 'com.lishang.http:LSHttp:1.0.0'
+    compile 'com.lishang.http:LSHttp:1.0.1'
 
 ## 支持以下操作
 - get请求
@@ -126,7 +126,47 @@
                     }
                 }).execute(this);
 
+### 4.如何知道，请求是onSuccess或onFail
+    @Override
+    public void onResponse(Call call, final Response response) throws IOException {
 
+         if (response.isSuccessful()) {
+            //请求成功
+            onConvertCallBack(response);
+        } else {
+            runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (callBack != null) {
+                        callBack.onFail(new LSHttpException(LSHttpException.ERROR.HTTP_ERROR, "请求失败，服务器开小差...", response.code()));
+                    }
+                }
+            });
+        }
+        removeLifecycle(obj, call);
+    }
+- response.isSuccessful() 判断服务端返回的status是否在200~300，如果是，进行onConvertCallBack，将结果转化成对应的数据。
+- 如果status没有在200~300之间，就进行onFail处理,将status抛给上层。
+- onConvertCallBack方法，进行区分使用自定义的Convert还是默认的JSONCallBack/StringCallBack
+
+        public void onConvertCallBack(final Response response) {
+            //用户是否需要自定义Convert
+            if (convertResponse != null) {
+                convertResponse.setCallBack(callBack);
+                convertResponse.convert(response);
+            } else if (callBack != null) {
+                
+                if (callBack instanceof JsonCallBack) {
+                    JsonConvertResponse convertResponse = new JsonConvertResponse();
+                    convertResponse.setCallBack(callBack);
+                    convertResponse.convert(response);
+                } else {
+                    StringConvertResponse convertResponse = new StringConvertResponse();
+                    convertResponse.setCallBack(callBack);
+                    convertResponse.convert(response);
+                }
+            }
+        }
 ### 如何发起一个请求呢？
     LSHttp.xxx(url) //请求方法，get/post/json/download/multipart
           .xxx()//不同请求支持的方法
@@ -516,6 +556,135 @@
         void onFail(LSHttpException e);
 
     }
+>LSHttpException,定义了些常见的错误处理，在三种情况下会收到<br>
+1-请求失败在如，SockteTimeOutException,等IO异常时，即OkHttp返回onFailure。<br>
+2-请求成功，但是服务端返回http status 不在200~300之间，如404，500
+3-请求成功,并且http status在200~300之间，但是convert时出错。
+
+    public class LSHttpException extends Exception {
+
+        /**
+        * 约定异常
+        */
+        public static class ERROR {
+            /**
+            * 未知错误
+            */
+            public static final int UNKNOWN = 1000;
+            /**
+            * 连接超时
+            */
+            public static final int TIMEOUT_ERROR = 1001;
+            /**
+            * 空指针错误
+            */
+            public static final int NULL_POINTER_EXCEPTION = 1002;
+
+            /**
+            * 证书出错
+            */
+            public static final int SSL_ERROR = 1003;
+
+            /**
+            * 类转换错误
+            */
+            public static final int CAST_ERROR = 1004;
+
+            /**
+            * 解析错误
+            */
+            public static final int PARSE_ERROR = 1005;
+
+            /**
+            * 非法数据异常
+            */
+            public static final int ILLEGAL_STATE_ERROR = 1006;
+
+            /**
+            * 服务端异常 http code >= 200 && <300
+            */
+            public static final int HTTP_ERROR = 1007;
+
+
+        }
+
+
+        public final int code; //错误Code
+        public String message; //描述
+        public int status; //当code == 1007 时 http status;
+
+        public LSHttpException(Throwable throwable, int code) {
+            this(throwable, code, -1);
+        }
+
+        public LSHttpException(Throwable throwable, int code, int status) {
+            super(throwable);
+            this.code = code;
+            this.message = throwable.getMessage();
+            this.status = status;
+        }
+
+        public LSHttpException(int code, String message) {
+            this(code, message, -1);
+        }
+
+        public LSHttpException(int code, String message, int status) {
+            this.code = code;
+            this.message = message;
+            this.status = status;
+        }
+
+
+        public static LSHttpException handleException(Throwable e) {
+            LSHttpException ex;
+            if (e instanceof SocketTimeoutException) {
+                ex = new LSHttpException(e, ERROR.TIMEOUT_ERROR);
+                ex.message = "网络不可用，请稍后再试";
+                return ex;
+            } else if (e instanceof ConnectException) {
+                ex = new LSHttpException(e, ERROR.TIMEOUT_ERROR);
+                ex.message = "网络不可用，请稍后再试";
+                return ex;
+            } else if (e instanceof ConnectTimeoutException) {
+                ex = new LSHttpException(e, ERROR.TIMEOUT_ERROR);
+                ex.message = "网络不可用，请稍后再试";
+                return ex;
+            } else if (e instanceof UnknownHostException) {
+                ex = new LSHttpException(e, ERROR.TIMEOUT_ERROR);
+                ex.message = "网络不可用，请稍后再试";
+                return ex;
+            } else if (e instanceof NullPointerException) {
+                ex = new LSHttpException(e, ERROR.NULL_POINTER_EXCEPTION);
+                ex.message = "空指针异常";
+                return ex;
+            } else if (e instanceof javax.net.ssl.SSLHandshakeException) {
+                ex = new LSHttpException(e, ERROR.SSL_ERROR);
+                ex.message = "证书验证失败";
+                return ex;
+            } else if (e instanceof ClassCastException) {
+                ex = new LSHttpException(e, ERROR.CAST_ERROR);
+                ex.message = "类型转换错误";
+                return ex;
+            } else if (e instanceof JsonParseException
+                    || e instanceof JSONException
+                    || e instanceof JsonSerializer
+                    || e instanceof NotSerializableException
+                    || e instanceof ParseException) {
+                ex = new LSHttpException(e, ERROR.PARSE_ERROR);
+                ex.message = "解析错误";
+                return ex;
+            } else if (e instanceof IllegalStateException) {
+                ex = new LSHttpException(e, ERROR.ILLEGAL_STATE_ERROR);
+                ex.message = e.getMessage();
+                return ex;
+            } else {
+                ex = new LSHttpException(e, ERROR.UNKNOWN);
+                ex.message = "未知错误";
+                return ex;
+            }
+        }
+
+    }
 
 ### 请求如何绑定Activity、Fragment
 >这里主要使用了 ActivityLifecycleCallbacks 和 FragmentManager.FragmentLifecycleCallbacks ，监听页面销毁时，将请求取消
@@ -884,3 +1053,6 @@
 [OKGO](https://github.com/jeasonlzy/okhttp-OkGo)
 
 ## 本次介绍到此为止，谢谢各位大佬的观看，有写的不对的地方，有写的不对的地方希望各位大佬指正。如果觉得写的可以的话，去GitHub给个星呗。
+
+## 更新日志
+- ### 2019.08.05      新增http stauts失败时对应status返回

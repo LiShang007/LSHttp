@@ -107,6 +107,7 @@ public class DownloadRequest extends BaseRequest<DownloadRequest> {
 
     /**
      * 文件下载保存路径
+     *
      * @param path
      * @return
      */
@@ -179,7 +180,7 @@ public class DownloadRequest extends BaseRequest<DownloadRequest> {
                 }
 
                 if (!response.isSuccessful()) {
-                    error(new LSHttpException(LSHttpException.ERROR.HTTP_ERROR, "请求失败，服务器开小差..." + response.code()));
+                    error(new LSHttpException(LSHttpException.ERROR.HTTP_ERROR, "请求失败，服务器开小差...", response.code()));
                     return;
                 }
 
