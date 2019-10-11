@@ -58,7 +58,7 @@ public class LSHttpActivityLifecycleCallBacks extends LSHttpLifecycleCallBacks i
     @Override
     public void onActivityDestroyed(Activity activity) {
 
-        String key = activity.getClass().getName();
+        String key = activity.toString();
         destroyed(key);
     }
 

@@ -19,7 +19,7 @@ public class LSHttpFragmentLifecycleCallBacks extends FragmentManager.FragmentLi
     public void onFragmentDestroyed(FragmentManager fm, Fragment f) {
         super.onFragmentDestroyed(fm, f);
 
-        String key = f.getClass().getName();
+        String key = f.toString();
         callBacks.destroyed(key);
 
 

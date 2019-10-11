@@ -276,7 +276,7 @@ public abstract class BaseRequest<T extends BaseRequest> {
     public void bindLifecycle(Object obj, Call call) {
         if (lifecycleCallBacks != null && obj != null) {
             if (obj instanceof Activity || obj instanceof Fragment)
-                lifecycleCallBacks.put(obj.getClass().getName(), call);
+                lifecycleCallBacks.put(obj.toString(), call);
         }
     }
 
@@ -288,7 +288,7 @@ public abstract class BaseRequest<T extends BaseRequest> {
      */
     public void removeLifecycle(Object obj, Call call) {
         if (lifecycleCallBacks != null && obj != null) {
-            lifecycleCallBacks.remove(obj.getClass().getName(), call);
+            lifecycleCallBacks.remove(obj.toString(), call);
         }
     }
 

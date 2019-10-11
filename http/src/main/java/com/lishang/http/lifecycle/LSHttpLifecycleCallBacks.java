@@ -31,7 +31,7 @@ public class LSHttpLifecycleCallBacks {
 
     public void remove(String key, Call call) {
         SparseArray<Call> calls = map.get(key);
-        if (call != null) {
+        if (call != null && calls != null) {
             calls.delete(call.hashCode());
             LSLog.i("LifecycleCallBacks class:" + key + "  call " + call.request().url().toString() + " remove success");
         }
